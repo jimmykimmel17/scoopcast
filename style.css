@@ -1,0 +1,251 @@
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: radial-gradient(circle at center, #1a1a2e 0%, #0a0a0f 100%);
+    overflow: hidden;
+    perspective: 1000px;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(2px 2px at 20px 30px, #fff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 50px 160px, #fff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 130px 80px, #fff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 160px 120px, #fff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 200px 60px, #fff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 240px 100px, #fff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 280px 140px, #fff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 320px 80px, #fff, rgba(0,0,0,0));
+    background-repeat: repeat;
+    background-size: 400px 400px;
+    opacity: 0.3;
+    animation: twinkle 4s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+    0%, 100% {
+        opacity: 0.3;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.bubbles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    overflow: hidden;
+    top: 0;
+    left: 0;
+    transform-style: preserve-3d;
+}
+
+.bubble {
+    position: absolute;
+    bottom: -100px;
+    width: 40px;
+    height: 40px;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.1));
+    border-radius: 50%;
+    opacity: 0.7;
+    animation: rise 10s infinite ease-in;
+    box-shadow: 
+        inset 0 0 30px rgba(255, 255, 255, 0.4),
+        0 0 20px rgba(255, 255, 255, 0.3),
+        0 0 40px rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(2px);
+    transform-style: preserve-3d;
+    background-size: cover;
+    background-position: center;
+    background-blend-mode: overlay;
+}
+
+.bubble.aziz2-image {
+    background-size: 150%;
+}
+
+.bubble:nth-child(1) {
+    width: 80px;
+    height: 80px;
+    left: 20%;
+    animation-duration: 12s;
+    transform: translateZ(0);
+}
+
+.bubble:nth-child(2) {
+    width: 60px;
+    height: 60px;
+    left: 50%;
+    animation-duration: 8s;
+    animation-delay: 2s;
+    transform: translateZ(10px);
+}
+
+.bubble:nth-child(3) {
+    width: 100px;
+    height: 100px;
+    left: 80%;
+    animation-duration: 15s;
+    animation-delay: 4s;
+    transform: translateZ(-5px);
+}
+
+.bubble:nth-child(4) {
+    width: 70px;
+    height: 70px;
+    left: 35%;
+    animation-duration: 11s;
+    animation-delay: 1.5s;
+    transform: translateZ(8px);
+}
+
+@keyframes rise {
+    0% {
+        bottom: -100px;
+        transform: translateX(0) rotate(0deg) translateZ(0);
+    }
+    50% {
+        transform: translate(100px, -500px) rotate(180deg) translateZ(50px);
+    }
+    100% {
+        bottom: 1080px;
+        transform: translateX(-200px) rotate(360deg) translateZ(0);
+    }
+}
+
+.slot-machine {
+    position: fixed;
+    bottom: 50px;
+    left: 50px;
+    transform: none;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.slot-container {
+    background: linear-gradient(145deg, #2a2a3a, #1a1a2e);
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 
+        0 0 25px rgba(0, 0, 0, 0.5),
+        inset 0 0 15px rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.slot-window {
+    width: 160px;
+    height: 160px;
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    border: 2px solid #4ecdc4;
+    box-shadow: 
+        0 0 15px rgba(78, 205, 196, 0.3),
+        inset 0 0 15px rgba(0, 0, 0, 0.5);
+    perspective: 1000px;
+}
+
+.slot-reel {
+    position: absolute;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.1s linear;
+    will-change: transform;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+}
+
+.slot-item {
+    width: 160px;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(145deg, #2a2a3a, #1a1a2e);
+    border-radius: 8px;
+    margin: 4px 0;
+    box-shadow: 
+        inset 0 0 15px rgba(0, 0, 0, 0.5),
+        0 0 8px rgba(255, 255, 255, 0.1);
+    transition: transform 0.1s ease;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    position: relative;
+}
+
+/* Special style only for Aziz image */
+.slot-item[style*="aziz.png"] {
+    background-size: 60%;
+    background-position: center;
+}
+
+.slot-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: inherit;
+    background-size: inherit;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 10px;
+    z-index: 1;
+}
+
+.slot-item:hover {
+    transform: scale(1.02);
+}
+
+.spin-button {
+    background: linear-gradient(145deg, #ff6b6b, #ff4757);
+    border: none;
+    padding: 12px 32px;
+    border-radius: 20px;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.spin-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+}
+
+.spin-button:active {
+    transform: translateY(1px);
+    box-shadow: 0 3px 10px rgba(255, 107, 107, 0.3);
+}
+
+.spin-button:disabled {
+    background: #666;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}

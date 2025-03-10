@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Panel - ScoopCast</title>
+    <style>
+        body {
+            background: #1a1a1a;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .admin-panel {
+            display: none;
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+        h2 {
+            margin-top: 0;
+            color: #fff;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 10px;
+        }
+        .upload-container {
+            margin: 15px 0;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+        }
+        input[type="text"]::placeholder,
+        input[type="password"]::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        .upload-btn {
+            background: #2196F3;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: inline-block;
+            margin: 5px;
+            transition: background 0.3s;
+        }
+        .upload-btn:hover {
+            background: #1976D2;
+        }
+        .save-btn, .login-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.3s;
+            width: 100%;
+        }
+        .save-btn:hover, .login-btn:hover {
+            background: #388E3C;
+        }
+        .delete-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            margin-left: 10px;
+            transition: background 0.3s;
+        }
+        .delete-btn:hover {
+            background: #d32f2f;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .image-preview {
+            margin-top: 10px;
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 5px;
+        }
+        .selected-file {
+            margin-top: 5px;
+            color: #4CAF50;
+            font-size: 0.9em;
+        }
+        .error-message {
+            color: #f44336;
+            margin-top: 10px;
+            font-size: 14px;
+            display: none;
+        }
+        .preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .preview-item {
+            position: relative;
+            width: 150px;
+            margin: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+        .preview-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        .preview-item .remove-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #f44336;
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .name-input {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 200px;
+        }
+        .upload-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+        .preview-item .name-label {
+            color: white;
+            text-align: center;
+            margin-top: 5px;
+            font-size: 14px;
+            word-break: break-word;
+        }
+        .stats-editor {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+        .stats-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .stats-inputs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .input-group label {
+            color: #00ffff;
+            font-size: 14px;
+        }
+        .admin-input {
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+        }
+        .admin-button {
+            padding: 12px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        .admin-button:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        .current-stats {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .current-stats h3 {
+            color: #00ffff;
+            margin-bottom: 10px;
+        }
+        #statsDisplay {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .stat-card {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+        .stat-card h4 {
+            color: white;
+            margin: 0 0 10px 0;
+        }
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            color: rgba(255, 255, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container" id="login-container">
+        <h1>Admin Login</h1>
+        <form id="login-form" onsubmit="return false;">
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button class="login-btn" onclick="attemptLogin()">Login</button>
+            <div class="error-message" id="error-message">Invalid credentials. Please try again.</div>
+        </form>
+    </div>
+
+    <div class="admin-panel" id="admin-panel">
+        <h1>Admin Panel</h1>
+        
+        <!-- Guess The Frame Section -->
+        <div class="section">
+            <h2>Guess The Frame</h2>
+            <div class="upload-container">
+                <label class="upload-btn" for="frame-upload">Choose Image</label>
+                <input type="file" id="frame-upload" accept="image/*">
+                <input type="text" id="frameName" placeholder="Enter name for the image" class="name-input">
+                <button class="save-btn" onclick="saveImage('frame')">Save Image</button>
+            </div>
+            <div id="frame-preview" class="preview-container"></div>
+            <button class="delete-btn" onclick="deleteAllImages('frame')">Delete All Images</button>
+        </div>
+
+        <!-- Guess The Dialogue Section -->
+        <div class="section">
+            <h2>Guess The Dialogue</h2>
+            <div class="upload-container">
+                <label class="upload-btn" for="dialogue-upload">Choose Image</label>
+                <input type="file" id="dialogue-upload" accept="image/*">
+                <input type="text" id="dialogueName" placeholder="Enter name for the image" class="name-input">
+                <button class="save-btn" onclick="saveImage('dialogue')">Save Image</button>
+            </div>
+            <div id="dialogue-preview" class="preview-container"></div>
+            <button class="delete-btn" onclick="deleteAllImages('dialogue')">Delete All Images</button>
+        </div>
+
+        <!-- Guess The Eyes Section -->
+        <div class="section">
+            <h2>Guess The Eyes</h2>
+            <div class="upload-container">
+                <label class="upload-btn" for="eyes-upload">Choose Image</label>
+                <input type="file" id="eyes-upload" accept="image/*">
+                <input type="text" id="eyesName" placeholder="Enter name for the image" class="name-input">
+                <button class="save-btn" onclick="saveImage('eyes')">Save Image</button>
+            </div>
+            <div id="eyes-preview" class="preview-container"></div>
+            <button class="delete-btn" onclick="deleteAllImages('eyes')">Delete All Images</button>
+        </div>
+
+        <!-- Guess The Curves Section -->
+        <div class="section">
+            <h2>Guess The Curves</h2>
+            <div class="upload-container">
+                <label class="upload-btn" for="curves-upload">Choose Original Image</label>
+                <input type="file" id="curves-upload" accept="image/*">
+                <input type="text" id="curvesName" placeholder="Enter name for the image" class="name-input">
+            </div>
+            <div class="upload-container">
+                <label class="upload-btn" for="curves-reveal-upload">Choose Reveal Image</label>
+                <input type="file" id="curves-reveal-upload" accept="image/*">
+            </div>
+            <button class="save-btn" onclick="saveCurvesImage()">Save Images</button>
+            <div id="curves-preview" class="preview-container"></div>
+            <button class="delete-btn" onclick="deleteAllImages('curves')">Delete All Images</button>
+        </div>
+
+        <!-- Stats Management Section -->
+        <div class="section">
+            <h2>Stats Management</h2>
+            <div class="stats-editor">
+                <div class="stats-form">
+                    <select id="playerSelect" class="admin-input">
+                        <option value="aziz2">Aziz</option>
+                        <option value="aman">Aman</option>
+                        <option value="vish">Vish</option>
+                        <option value="amesh">Amesh</option>
+                    </select>
+                    <div class="stats-inputs">
+                        <div class="input-group">
+                            <label>Total Wins</label>
+                            <input type="number" id="winsInput" class="admin-input" min="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Total Score</label>
+                            <input type="number" id="scoreInput" class="admin-input" min="0">
+                        </div>
+                    </div>
+                    <button onclick="updatePlayerStats()" class="admin-button">Update Stats</button>
+                </div>
+                <div class="current-stats">
+                    <h3>Current Stats</h3>
+                    <div id="statsDisplay"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+    <script>
+        function attemptLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('error-message');
+            
+            if (username === 'kaustubh' && password === 'kaustubh#6379') {
+                document.getElementById('login-container').style.display = 'none';
+                document.getElementById('admin-panel').style.display = 'block';
+                errorMessage.style.display = 'none';
+            } else {
+                errorMessage.style.display = 'block';
+            }
+        }
+
+        // Handle Enter key in login form
+        document.getElementById('password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                attemptLogin();
+            }
+        });
+
+        function saveImage(section) {
+            const fileInput = document.getElementById(`${section}-upload`);
+            const nameInput = document.getElementById(`${section}Name`);
+            const files = fileInput.files;
+            const name = nameInput.value.trim();
+
+            if (files.length === 0) {
+                alert('Please select an image');
+                return;
+            }
+
+            if (!name) {
+                alert('Please enter a name for the image');
+                return;
+            }
+
+            // Check file size (max 5MB)
+            if (files[0].size > 5 * 1024 * 1024) {
+                alert('Image size should be less than 5MB');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    // Compress the image before storing
+                    compressImage(e.target.result).then(compressedImage => {
+                        const images = JSON.parse(localStorage.getItem(`${section}Images`) || '[]');
+                        const imageData = {
+                            src: compressedImage,
+                            name: name
+                        };
+                        
+                        // Check if we're approaching localStorage limit
+                        const testStorage = JSON.stringify([...images, imageData]);
+                        if (testStorage.length > 4.5 * 1024 * 1024) { // Leave some buffer
+                            alert('Storage limit reached. Please delete some images first.');
+                            return;
+                        }
+                        
+                        images.push(imageData);
+                        localStorage.setItem(`${section}Images`, JSON.stringify(images));
+                        
+                        // Clear inputs
+                        fileInput.value = '';
+                        nameInput.value = '';
+                        
+                        // Update preview
+                        updatePreview(section);
+                        
+                        // Show success message
+                        alert(`Image "${name}" saved successfully!`);
+                    }).catch(error => {
+                        console.error('Error compressing image:', error);
+                        alert('Error processing image. Please try again with a smaller image.');
+                    });
+                } catch (error) {
+                    console.error('Error storing image:', error);
+                    alert('Error saving image. Please try again.');
+                }
+            };
+
+            reader.onerror = function(error) {
+                console.error('Error reading file:', error);
+                alert('Error reading file. Please try again.');
+            };
+
+            reader.readAsDataURL(files[0]);
+        }
+
+        // Add image compression function
+        function compressImage(base64String) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+
+                    // Calculate new dimensions (maintaining aspect ratio)
+                    let width = img.width;
+                    let height = img.height;
+                    const maxDimension = 800; // Max width or height
+
+                    if (width > height && width > maxDimension) {
+                        height = (height * maxDimension) / width;
+                        width = maxDimension;
+                    } else if (height > maxDimension) {
+                        width = (width * maxDimension) / height;
+                        height = maxDimension;
+                    }
+
+                    // Set canvas dimensions
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    // Draw and compress image
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // Get compressed image as base64 string with reduced quality
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7); // 0.7 is the quality (0 to 1)
+                    resolve(compressedBase64);
+                };
+                img.onerror = reject;
+                img.src = base64String;
+            });
+        }
+
+        function updatePreview(section) {
+            const previewContainer = document.getElementById(`${section}-preview`);
+            const images = JSON.parse(localStorage.getItem(`${section}Images`) || '[]');
+            
+            previewContainer.innerHTML = '';
+            images.forEach((imageData, index) => {
+                const previewItem = document.createElement('div');
+                previewItem.className = 'preview-item';
+                
+                const img = document.createElement('img');
+                img.src = imageData.src;
+                img.alt = imageData.name;
+                
+                const nameLabel = document.createElement('div');
+                nameLabel.className = 'name-label';
+                nameLabel.textContent = imageData.name;
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-btn';
+                removeBtn.innerHTML = '×';
+                removeBtn.onclick = () => removeImage(section, index);
+                
+                previewItem.appendChild(img);
+                previewItem.appendChild(nameLabel);
+                previewItem.appendChild(removeBtn);
+                previewContainer.appendChild(previewItem);
+            });
+
+            // Update counter
+            const title = previewContainer.parentElement.querySelector('h2');
+            title.textContent = `${title.textContent.split(' (')[0]} (${images.length} images)`;
+        }
+
+        function removeImage(section, index) {
+            try {
+                const images = JSON.parse(localStorage.getItem(`${section}Images`) || '[]');
+                const removedImage = images[index];
+                images.splice(index, 1);
+                localStorage.setItem(`${section}Images`, JSON.stringify(images));
+                updatePreview(section);
+                alert(`Image "${removedImage.name}" removed successfully!`);
+            } catch (error) {
+                console.error('Error removing image:', error);
+                alert('Error removing image. Please try again.');
+            }
+        }
+
+        function deleteAllImages(section) {
+            const images = JSON.parse(localStorage.getItem(`${section}Images`) || '[]');
+            if (images.length === 0) {
+                alert('No images to delete.');
+                return;
+            }
+            
+            if (confirm(`Are you sure you want to delete all ${images.length} images from ${section}?`)) {
+                localStorage.setItem(`${section}Images`, '[]');
+                updatePreview(section);
+                alert(`All images deleted from ${section} successfully!`);
+            }
+        }
+
+        // Initialize previews for all sections
+        ['frame', 'dialogue', 'eyes', 'curves'].forEach(section => {
+            updatePreview(section);
+        });
+
+        function loadCurrentStats() {
+            const stats = JSON.parse(localStorage.getItem('allTimeStats') || '{}');
+            const display = document.getElementById('statsDisplay');
+            display.innerHTML = '';
+
+            Object.entries(stats).forEach(([player, data]) => {
+                const name = player.charAt(0).toUpperCase() + player.slice(1).replace('2', '');
+                const card = document.createElement('div');
+                card.className = 'stat-card';
+                card.innerHTML = `
+                    <h4>${name}</h4>
+                    <div class="stat-item">
+                        <span>Wins:</span>
+                        <span>${data.wins}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Score:</span>
+                        <span>${data.totalScore}</span>
+                    </div>
+                `;
+                display.appendChild(card);
+            });
+        }
+
+        function updatePlayerStats() {
+            const player = document.getElementById('playerSelect').value;
+            const wins = parseInt(document.getElementById('winsInput').value) || 0;
+            const score = parseInt(document.getElementById('scoreInput').value) || 0;
+
+            const stats = JSON.parse(localStorage.getItem('allTimeStats') || '{}');
+            stats[player] = {
+                wins: wins,
+                totalScore: score,
+                lastUpdated: new Date().toISOString()
+            };
+
+            localStorage.setItem('allTimeStats', JSON.stringify(stats));
+            loadCurrentStats();
+
+            // Clear inputs
+            document.getElementById('winsInput').value = '';
+            document.getElementById('scoreInput').value = '';
+
+            alert('Stats updated successfully!');
+        }
+
+        // Load current stats when page loads
+        document.addEventListener('DOMContentLoaded', loadCurrentStats);
+
+        // Load player stats when selecting a player
+        document.getElementById('playerSelect').addEventListener('change', function() {
+            const player = this.value;
+            const stats = JSON.parse(localStorage.getItem('allTimeStats') || '{}');
+            const playerStats = stats[player] || { wins: 0, totalScore: 0 };
+
+            document.getElementById('winsInput').value = playerStats.wins;
+            document.getElementById('scoreInput').value = playerStats.totalScore;
+        });
+
+        // Add this new function for saving curves images
+        function saveCurvesImage() {
+            const fileInput = document.getElementById('curves-upload');
+            const revealFileInput = document.getElementById('curves-reveal-upload');
+            const nameInput = document.getElementById('curvesName');
+            const files = fileInput.files;
+            const revealFiles = revealFileInput.files;
+            const name = nameInput.value.trim();
+
+            if (files.length === 0) {
+                alert('Please select an original image');
+                return;
+            }
+
+            if (revealFiles.length === 0) {
+                alert('Please select a reveal image');
+                return;
+            }
+
+            if (!name) {
+                alert('Please enter a name for the image');
+                return;
+            }
+
+            // Check file sizes (max 5MB each)
+            if (files[0].size > 5 * 1024 * 1024 || revealFiles[0].size > 5 * 1024 * 1024) {
+                alert('Image sizes should be less than 5MB');
+                return;
+            }
+
+            const reader = new FileReader();
+            const revealReader = new FileReader();
+            let originalImage = null;
+            let revealImage = null;
+
+            reader.onload = function(e) {
+                compressImage(e.target.result).then(compressedImage => {
+                    originalImage = compressedImage;
+                    if (revealImage) {
+                        saveCurvesImagesToStorage(originalImage, revealImage, name);
+                    }
+                }).catch(error => {
+                    console.error('Error compressing original image:', error);
+                    alert('Error processing original image. Please try again with a smaller image.');
+                });
+            };
+
+            revealReader.onload = function(e) {
+                compressImage(e.target.result).then(compressedImage => {
+                    revealImage = compressedImage;
+                    if (originalImage) {
+                        saveCurvesImagesToStorage(originalImage, revealImage, name);
+                    }
+                }).catch(error => {
+                    console.error('Error compressing reveal image:', error);
+                    alert('Error processing reveal image. Please try again with a smaller image.');
+                });
+            };
+
+            reader.onerror = function(error) {
+                console.error('Error reading original file:', error);
+                alert('Error reading original file. Please try again.');
+            };
+
+            revealReader.onerror = function(error) {
+                console.error('Error reading reveal file:', error);
+                alert('Error reading reveal file. Please try again.');
+            };
+
+            reader.readAsDataURL(files[0]);
+            revealReader.readAsDataURL(revealFiles[0]);
+        }
+
+        function saveCurvesImagesToStorage(originalImage, revealImage, name) {
+            try {
+                const images = JSON.parse(localStorage.getItem('curvesImages') || '[]');
+                const imageData = {
+                    src: originalImage,
+                    revealSrc: revealImage,
+                    name: name
+                };
+                
+                // Check if we're approaching localStorage limit
+                const testStorage = JSON.stringify([...images, imageData]);
+                if (testStorage.length > 4.5 * 1024 * 1024) { // Leave some buffer
+                    alert('Storage limit reached. Please delete some images first.');
+                    return;
+                }
+                
+                images.push(imageData);
+                localStorage.setItem('curvesImages', JSON.stringify(images));
+                
+                // Clear inputs
+                document.getElementById('curves-upload').value = '';
+                document.getElementById('curves-reveal-upload').value = '';
+                document.getElementById('curvesName').value = '';
+                
+                // Update preview
+                updatePreview('curves');
+                
+                // Show success message
+                alert(`Images "${name}" saved successfully!`);
+            } catch (error) {
+                console.error('Error storing images:', error);
+                alert('Error saving images. Please try again.');
+            }
+        }
+
+        // Update the updatePreview function to handle reveal images for curves section
+        function updatePreview(section) {
+            const previewContainer = document.getElementById(`${section}-preview`);
+            const images = JSON.parse(localStorage.getItem(`${section}Images`) || '[]');
+            
+            previewContainer.innerHTML = '';
+            images.forEach((imageData, index) => {
+                const previewItem = document.createElement('div');
+                previewItem.className = 'preview-item';
+                
+                const img = document.createElement('img');
+                img.src = imageData.src;
+                img.alt = imageData.name;
+                
+                const nameLabel = document.createElement('div');
+                nameLabel.className = 'name-label';
+                nameLabel.textContent = imageData.name;
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-btn';
+                removeBtn.innerHTML = '×';
+                removeBtn.onclick = () => removeImage(section, index);
+                
+                previewItem.appendChild(img);
+                previewItem.appendChild(nameLabel);
+                previewItem.appendChild(removeBtn);
+
+                // Add reveal image preview for curves section
+                if (section === 'curves' && imageData.revealSrc) {
+                    const revealImg = document.createElement('img');
+                    revealImg.src = imageData.revealSrc;
+                    revealImg.alt = `${imageData.name} (Revealed)`;
+                    revealImg.style.marginTop = '10px';
+                    previewItem.appendChild(revealImg);
+                }
+                
+                previewContainer.appendChild(previewItem);
+            });
+
+            // Update counter
+            const title = previewContainer.parentElement.querySelector('h2');
+            title.textContent = `${title.textContent.split(' (')[0]} (${images.length} images)`;
+        }
+    </script>
+</body>
+</html> 

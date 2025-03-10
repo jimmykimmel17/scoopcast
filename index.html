@@ -1,0 +1,1858 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Scoopcast</title>
+        <link rel="stylesheet" href="./style.css">
+        <link rel="stylesheet" href="frame-viewer.css">
+        <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="images/android-chrome-192x192.png">
+        <link rel="icon" href="images/favicon.ico">
+        <style>
+            /* Hide the admin button in the index page */
+            .admin-login-button {
+                display: none;
+            }
+
+            /* Add reveal popup styles */
+            .reveal-popup {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.9);
+                display: none;
+                justify-content: center;
+                align-items: center;
+                z-index: 2000;
+            }
+
+            .reveal-popup.show {
+                display: flex;
+            }
+
+            .reveal-content {
+                background: linear-gradient(145deg, rgba(0, 0, 0, 0.95), rgba(20, 20, 20, 0.98));
+                padding: 30px;
+                border-radius: 20px;
+                text-align: center;
+                max-width: 90%;
+                max-height: 90vh;
+                box-shadow: 0 0 50px rgba(0, 255, 255, 0.3),
+                           inset 0 0 30px rgba(0, 255, 255, 0.1);
+                border: 2px solid rgba(0, 255, 255, 0.2);
+                backdrop-filter: blur(10px);
+            }
+
+            .reveal-title {
+                color: #00ffff;
+                font-size: 28px;
+                margin-bottom: 20px;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            }
+
+            .reveal-image {
+                max-width: 100%;
+                max-height: 70vh;
+                border-radius: 10px;
+                margin-bottom: 20px;
+                box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+            }
+
+            /* Section Navigation */
+            .section-navigation {
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                gap: 15px;
+                z-index: 1000;
+                background: rgba(0, 0, 0, 0.7);
+                padding: 10px;
+                border-radius: 15px;
+                backdrop-filter: blur(10px);
+                box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .section-btn {
+                padding: 12px 25px;
+                background: rgba(0, 0, 0, 0.5);
+                color: white;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                border-radius: 10px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                font-size: 16px;
+                font-weight: 500;
+                letter-spacing: 1px;
+            }
+
+            .section-btn:hover {
+                background: rgba(0, 0, 0, 0.8);
+                border-color: rgba(255, 255, 255, 0.4);
+                transform: translateY(-2px);
+            }
+
+            .section-btn.active {
+                background: #4CAF50;
+                border-color: #4CAF50;
+                box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
+            }
+
+            /* Frame Viewer */
+            .frame-viewer {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -60%);
+                width: 84%;
+                max-width: 840px;
+                background: linear-gradient(145deg, rgba(0, 0, 0, 0.9), rgba(20, 20, 20, 0.95));
+                padding: 21px;
+                padding-top: 42px;
+                border-radius: 16px;
+                display: block;
+                z-index: 900;
+                box-shadow: 0 0 40px rgba(0, 0, 0, 0.5),
+                           inset 0 0 20px rgba(0, 0, 0, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                margin-bottom: 63px;
+            }
+
+            .frame-title {
+                color: #fff;
+                text-align: center;
+                margin-bottom: 21px;
+                margin-top: 0;
+                font-size: 25px;
+                font-weight: bold;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+                position: relative;
+                padding-bottom: 15px;
+            }
+
+            .frame-title::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 100px;
+                height: 3px;
+                background: linear-gradient(90deg, transparent, #4CAF50, transparent);
+                border-radius: 2px;
+            }
+
+            .frame-container {
+                position: relative;
+                width: 100%;
+                height: 472px;
+                background: rgba(0, 0, 0, 0.5);
+                border-radius: 15px;
+                overflow: hidden;
+                box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5);
+                border: 2px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .frame-image {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                transition: transform 0.3s ease;
+                padding: 20px;
+                box-sizing: border-box;
+            }
+
+            .frame-image:hover {
+                transform: scale(1.02);
+            }
+
+            .frame-nav {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                background: rgba(0, 0, 0, 0.8);
+                color: white;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                padding: 20px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                border-radius: 50%;
+                z-index: 1001;
+                width: 42px;
+                height: 42px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 21px;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            }
+
+            .frame-nav:hover {
+                background: rgba(0, 0, 0, 0.9);
+                border-color: rgba(255, 255, 255, 0.4);
+                box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+                transform: translateY(-50%) scale(1.1);
+            }
+
+            .frame-prev {
+                left: 20px;
+            }
+
+            .frame-next {
+                right: 20px;
+            }
+
+            .frame-counter {
+                position: absolute;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                color: white;
+                background: rgba(0, 0, 0, 0.8);
+                padding: 8px 20px;
+                border-radius: 20px;
+                z-index: 1001;
+                font-size: 16px;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            }
+
+            .reveal-button {
+                position: absolute;
+                bottom: 20px;
+                right: 20px;
+                background: #4CAF50;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 16px;
+                transition: all 0.3s ease;
+                z-index: 1002;
+            }
+
+            .reveal-button:hover {
+                background: #45a049;
+                transform: translateY(-2px);
+            }
+
+            .image-name {
+                position: absolute;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0, 0, 0, 0.8);
+                color: #00ffff;
+                padding: 10px 20px;
+                border-radius: 5px;
+                font-size: 18px;
+                display: none;
+                z-index: 1002;
+                border: 1px solid rgba(0, 255, 255, 0.2);
+                white-space: nowrap;
+                overflow: hidden;
+                text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            }
+
+            .image-name.show {
+                display: block;
+                animation: fadeIn 0.3s ease;
+            }
+
+            .image-name.typing {
+                display: block;
+                border-right: 2px solid #00ffff;
+                animation: typing 1s steps(30, end), blink-caret 0.75s step-end infinite;
+            }
+
+            .image-name.glitch {
+                display: block;
+                animation: glitch-reveal 1.5s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+            }
+
+            @keyframes typing {
+                from { width: 0 }
+                to { width: 100% }
+            }
+
+            @keyframes blink-caret {
+                from, to { border-color: transparent }
+                50% { border-color: #00ffff }
+            }
+
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translate(-50%, 20px); }
+                to { opacity: 1; transform: translate(-50%, 0); }
+            }
+
+            @keyframes glitch-reveal {
+                0% {
+                    clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
+                    transform: translate(-50%, 0) skew(0deg);
+                    text-shadow: none;
+                }
+                10% {
+                    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+                    transform: translate(-52%, 0) skew(10deg);
+                    text-shadow: 3px 0 #ff00ff, -3px 0 #00ffff;
+                }
+                15% {
+                    transform: translate(-48%, 0) skew(-5deg);
+                    text-shadow: -3px 0 #ff00ff, 3px 0 #00ffff;
+                }
+                20% {
+                    transform: translate(-50%, 0) skew(0deg);
+                    text-shadow: 3px 3px #ff00ff, -3px -3px #00ffff;
+                }
+                30% {
+                    transform: translate(-50%, 0);
+                    text-shadow: none;
+                }
+                35% {
+                    transform: translate(-50%, 0);
+                    text-shadow: 0 0 20px #00ffff;
+                }
+                40% {
+                    transform: translate(-50%, 0);
+                    text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff;
+                }
+                100% {
+                    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+                    transform: translate(-50%, 0);
+                    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+                }
+            }
+
+            .glitch-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: transparent;
+                pointer-events: none;
+                z-index: 9999;
+                animation: glitch-overlay 1s ease-out;
+                opacity: 0;
+            }
+
+            @keyframes glitch-overlay {
+                0% {
+                    background: transparent;
+                }
+                10% {
+                    background: rgba(0, 255, 255, 0.1);
+                }
+                20% {
+                    background: transparent;
+                }
+                30% {
+                    background: rgba(255, 0, 255, 0.1);
+                }
+                40% {
+                    background: transparent;
+                }
+                50% {
+                    background: rgba(0, 255, 255, 0.1);
+                }
+                100% {
+                    background: transparent;
+                }
+            }
+
+            /* Slot machine styles */
+            .slot-machine {
+                position: fixed;
+                bottom: 30px;
+                left: 10px;
+                transform: none;
+                z-index: 1000;
+                background: #000000;
+                padding: 35px;
+                clip-path: polygon(
+                    0 10px,
+                    10px 0,
+                    calc(100% - 10px) 0,
+                    100% 10px,
+                    100% calc(100% - 10px),
+                    calc(100% - 10px) 100%,
+                    10px 100%,
+                    0 calc(100% - 10px)
+                );
+                box-shadow: 0 0 30px rgba(0, 255, 255, 0.2),
+                           inset 0 0 20px rgba(0, 255, 255, 0.1);
+                border: 2px solid rgba(0, 255, 255, 0.3);
+                backdrop-filter: blur(10px);
+                transition: all 0.3s ease;
+            }
+
+            .slot-machine::before {
+                content: '';
+                position: absolute;
+                inset: -2px;
+                background: linear-gradient(45deg, 
+                    transparent 20%, 
+                    rgba(0, 255, 255, 0.5),
+                    transparent 40%
+                );
+                z-index: -1;
+            }
+
+            .slot-machine::after {
+                content: 'CYBER SPIN';
+                position: absolute;
+                top: -25px;
+                left: 50%;
+                transform: translateX(-50%);
+                font-family: monospace;
+                font-size: 20px;
+                font-weight: bold;
+                color: #00ffff;
+                text-shadow: 0 0 10px #00ffff,
+                            0 0 20px #00ffff,
+                            0 0 30px #00ffff;
+                letter-spacing: 3px;
+            }
+
+            .slot-container {
+                position: relative;
+                border: 2px solid rgba(0, 255, 255, 0.3);
+                background: rgba(0, 0, 0, 0.7);
+                padding: 3px;
+                clip-path: polygon(
+                    0 15px,
+                    15px 0,
+                    calc(100% - 15px) 0,
+                    100% 15px,
+                    100% calc(100% - 15px),
+                    calc(100% - 15px) 100%,
+                    15px 100%,
+                    0 calc(100% - 15px)
+                );
+            }
+
+            .slot-window {
+                width: 300px;
+                height: 300px;
+                overflow: hidden;
+                position: relative;
+                background: #000;
+            }
+
+            .slot-window::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: repeating-linear-gradient(
+                    transparent 0%,
+                    rgba(0, 255, 255, 0.05) 1px,
+                    transparent 2px
+                );
+                pointer-events: none;
+            }
+
+            .slot-window::after {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: -10%;
+                right: -10%;
+                height: 2px;
+                background: #00ffff;
+                filter: blur(2px);
+                box-shadow: 0 0 20px #00ffff,
+                           0 0 40px #00ffff,
+                           0 0 60px #00ffff;
+                transform: translateY(-50%);
+                opacity: 0.7;
+            }
+
+            .spin-button {
+                width: 100%;
+                padding: 20px;
+                margin-top: 20px;
+                font-family: monospace;
+                font-size: 24px;
+                font-weight: bold;
+                color: #00ffff;
+                background: #000000;
+                border: 2px solid #00ffff;
+                clip-path: polygon(
+                    0 10px,
+                    10px 0,
+                    calc(100% - 10px) 0,
+                    100% 10px,
+                    100% calc(100% - 10px),
+                    calc(100% - 10px) 100%,
+                    10px 100%,
+                    0 calc(100% - 10px)
+                );
+                cursor: pointer;
+                transition: all 0.3s ease;
+                text-shadow: 0 0 10px #00ffff;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .spin-button::before {
+                content: '';
+                position: absolute;
+                top: -100%;
+                left: -100%;
+                width: 300%;
+                height: 300%;
+                background: radial-gradient(circle, rgba(0, 255, 255, 0.4) 0%, transparent 70%);
+                transition: 0.5s;
+            }
+
+            .spin-button::after {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(0, 255, 255, 0.1) 10px,
+                    rgba(0, 255, 255, 0.1) 20px
+                );
+            }
+
+            .spin-button:hover {
+                color: #fff;
+                text-shadow: 0 0 10px #00ffff,
+                            0 0 20px #00ffff;
+                border-color: #fff;
+                box-shadow: 0 0 20px rgba(0, 255, 255, 0.5),
+                           inset 0 0 20px rgba(0, 255, 255, 0.5);
+                transform: translateY(-2px);
+            }
+
+            .spin-button:hover::before {
+                transform: translate(50%, 50%) rotate(45deg);
+            }
+
+            .spin-button:active {
+                transform: translateY(1px);
+            }
+
+            .spin-button:disabled {
+                background: #1a1a1a;
+                border-color: #666;
+                color: #666;
+                cursor: not-allowed;
+                text-shadow: none;
+                box-shadow: none;
+            }
+
+            /* Notification styles */
+            .notification {
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0, 0, 0, 0.8);
+                color: #00ffff;
+                padding: 15px 30px;
+                clip-path: polygon(
+                    0 10px,
+                    10px 0,
+                    calc(100% - 10px) 0,
+                    100% 10px,
+                    100% calc(100% - 10px),
+                    calc(100% - 10px) 100%,
+                    10px 100%,
+                    0 calc(100% - 10px)
+                );
+                font-family: monospace;
+                font-size: 18px;
+                text-shadow: 0 0 10px #00ffff;
+                border: 1px solid #00ffff;
+                z-index: 2000;
+                animation: notificationGlow 2s ease-in-out;
+            }
+
+            @keyframes notificationGlow {
+                0% { opacity: 0; transform: translate(-50%, -20px); box-shadow: 0 0 0 rgba(0, 255, 255, 0); }
+                20% { opacity: 1; transform: translate(-50%, 0); box-shadow: 0 0 30px rgba(0, 255, 255, 0.5); }
+                80% { opacity: 1; transform: translate(-50%, 0); box-shadow: 0 0 30px rgba(0, 255, 255, 0.5); }
+                100% { opacity: 0; transform: translate(-50%, -20px); box-shadow: 0 0 0 rgba(0, 255, 255, 0); }
+            }
+
+            /* Scoreboard Styles */
+            .scoreboard {
+                position: fixed;
+                right: 30px;
+                top: 50%;
+                transform: translateY(-50%);
+                background: linear-gradient(145deg, rgba(0, 0, 0, 0.9), rgba(20, 20, 20, 0.95));
+                padding: 15px;
+                border-radius: 12px;
+                box-shadow: 0 0 30px rgba(0, 0, 0, 0.5),
+                           inset 0 0 20px rgba(0, 0, 0, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                z-index: 1000;
+                min-width: 220px;
+            }
+
+            .scoreboard-title {
+                color: #00ffff;
+                text-align: center;
+                font-size: 20px;
+                margin: 0 0 15px 0;
+                padding-bottom: 8px;
+                border-bottom: 2px solid rgba(0, 255, 255, 0.3);
+                text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+                letter-spacing: 2px;
+            }
+
+            .score-container {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                padding-bottom: 8px;
+            }
+
+            .score-card {
+                background: rgba(0, 0, 0, 0.5);
+                padding: 12px;
+                border-radius: 8px;
+                border: 1px solid rgba(0, 255, 255, 0.2);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                transition: all 0.3s ease;
+            }
+
+            .player-name {
+                color: #fff;
+                font-size: 16px;
+                font-weight: bold;
+                text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+            }
+
+            .player-score {
+                color: #00ffff;
+                font-size: 20px;
+                font-weight: bold;
+                text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            }
+
+            .score-controls {
+                display: flex;
+                gap: 8px;
+            }
+
+            .score-btn {
+                width: 32px;
+                height: 32px;
+                border: none;
+                border-radius: 6px;
+                font-size: 18px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+            }
+
+            .score-btn.plus {
+                background: #4CAF50;
+            }
+
+            .score-btn.minus {
+                background: #f44336;
+            }
+
+            .score-btn:hover {
+                transform: scale(1.1);
+                box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+            }
+
+            .score-btn:active {
+                transform: scale(0.95);
+            }
+
+            @keyframes scoreUpdate {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.2); }
+                100% { transform: scale(1); }
+            }
+
+            .score-updated {
+                animation: scoreUpdate 0.3s ease;
+            }
+
+            /* Add these styles to the existing style section */
+            .submit-score-btn {
+                width: 100%;
+                padding: 12px;
+                margin-top: 15px;
+                background: linear-gradient(145deg, #4CAF50, #45a049);
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                box-shadow: 0 0 20px rgba(76, 175, 80, 0.2);
+                border: 1px solid rgba(76, 175, 80, 0.3);
+            }
+
+            .submit-score-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 0 30px rgba(76, 175, 80, 0.4);
+                background: linear-gradient(145deg, #45a049, #4CAF50);
+            }
+
+            .submit-score-btn:active {
+                transform: translateY(1px);
+            }
+
+            .winner-popup {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) scale(0.9);
+                background: linear-gradient(145deg, rgba(0, 0, 0, 0.95), rgba(20, 20, 20, 0.98));
+                padding: 30px;
+                border-radius: 20px;
+                z-index: 2000;
+                text-align: center;
+                min-width: 300px;
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+                box-shadow: 0 0 50px rgba(0, 255, 255, 0.3),
+                           inset 0 0 30px rgba(0, 255, 255, 0.1);
+                border: 2px solid rgba(0, 255, 255, 0.2);
+                backdrop-filter: blur(10px);
+            }
+
+            .winner-popup.show {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .winner-title {
+                color: #00ffff;
+                font-size: 28px;
+                margin-bottom: 20px;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            }
+
+            .winner-name {
+                color: #fff;
+                font-size: 36px;
+                margin: 20px 0;
+                font-weight: bold;
+                text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            }
+
+            .winner-score {
+                color: #00ffff;
+                font-size: 24px;
+                margin-bottom: 25px;
+                text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+            }
+
+            .creator-credit {
+                margin-bottom: 20px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .creator-credit p {
+                margin: 0;
+                font-size: 16px;
+                color: #fff;
+                text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            }
+
+            .qr-code {
+                width: 200px;
+                height: 200px;
+                object-fit: contain;
+                border: 2px solid rgba(0, 255, 255, 0.3);
+                border-radius: 10px;
+                padding: 10px;
+                background: rgba(0, 0, 0, 0.5);
+                box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+            }
+
+            .close-popup {
+                padding: 10px 25px;
+                background: rgba(0, 255, 255, 0.2);
+                color: white;
+                border: 1px solid rgba(0, 255, 255, 0.3);
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 16px;
+                transition: all 0.3s ease;
+            }
+
+            .close-popup:hover {
+                background: rgba(0, 255, 255, 0.3);
+                transform: translateY(-2px);
+            }
+
+            /* Add confetti styles */
+            .confetti {
+                position: fixed;
+                top: -10px;
+                width: 10px;
+                height: 10px;
+                animation: confetti-fall 3s linear forwards;
+                z-index: 1999;
+            }
+
+            @keyframes confetti-fall {
+                0% {
+                    transform: translateY(0) rotate(0deg);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateY(100vh) rotate(720deg);
+                    opacity: 0;
+                }
+            }
+
+            /* All-time Stats Panel */
+            .all-time-stats {
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                background: linear-gradient(145deg, rgba(0, 0, 0, 0.9), rgba(20, 20, 20, 0.95));
+                padding: 12px;
+                border-radius: 10px;
+                box-shadow: 0 0 20px rgba(0, 255, 255, 0.2),
+                           inset 0 0 15px rgba(0, 255, 255, 0.1);
+                border: 1px solid rgba(0, 255, 255, 0.2);
+                backdrop-filter: blur(10px);
+                z-index: 1000;
+                min-width: 200px;
+                clip-path: polygon(
+                    0 6px,
+                    6px 0,
+                    calc(100% - 6px) 0,
+                    100% 6px,
+                    100% calc(100% - 6px),
+                    calc(100% - 6px) 100%,
+                    6px 100%,
+                    0 calc(100% - 6px)
+                );
+            }
+
+            .stats-title {
+                color: #00ffff;
+                text-align: center;
+                font-size: 14px;
+                margin: 0 0 10px 0;
+                padding-bottom: 6px;
+                border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+                text-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
+                letter-spacing: 1px;
+                text-transform: uppercase;
+            }
+
+            .stats-container {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .stats-card {
+                background: rgba(0, 0, 0, 0.5);
+                padding: 6px;
+                border-radius: 5px;
+                border: 1px solid rgba(0, 255, 255, 0.2);
+                transition: all 0.3s ease;
+            }
+
+            .stats-card:hover {
+                background: rgba(0, 0, 0, 0.7);
+                border-color: rgba(0, 255, 255, 0.4);
+                transform: translateX(5px);
+            }
+
+            .stats-player-name {
+                color: #fff;
+                font-size: 12px;
+                font-weight: bold;
+                margin-bottom: 3px;
+                text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+            }
+
+            .stats-details {
+                display: flex;
+                justify-content: space-between;
+                gap: 6px;
+                font-size: 11px;
+                color: rgba(255, 255, 255, 0.8);
+            }
+
+            .stats-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .stats-label {
+                color: #00ffff;
+                font-size: 9px;
+                opacity: 0.8;
+                margin-bottom: 1px;
+            }
+
+            .stats-value {
+                color: #fff;
+                font-weight: bold;
+                text-shadow: 0 0 4px rgba(0, 255, 255, 0.5);
+            }
+
+            .last-updated {
+                color: rgba(255, 255, 255, 0.5);
+                font-size: 9px;
+                text-align: center;
+                margin-top: 8px;
+                font-style: italic;
+            }
+
+            /* Add this before the winner-popup div */
+            .referee-popup {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) scale(0.9);
+                background: linear-gradient(145deg, rgba(0, 0, 0, 0.95), rgba(20, 20, 20, 0.98));
+                padding: 30px;
+                border-radius: 20px;
+                z-index: 2000;
+                text-align: center;
+                min-width: 300px;
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+                box-shadow: 0 0 50px rgba(0, 255, 255, 0.3),
+                           inset 0 0 30px rgba(0, 255, 255, 0.1);
+                border: 2px solid rgba(0, 255, 255, 0.2);
+                backdrop-filter: blur(10px);
+            }
+
+            .referee-popup.show {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .referee-title {
+                color: #00ffff;
+                font-size: 28px;
+                margin-bottom: 20px;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            }
+
+            .referee-name {
+                color: #fff;
+                font-size: 36px;
+                margin: 20px 0;
+                font-weight: bold;
+                text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            }
+
+            /* Add this to the body style */
+            body {
+                margin: 0;
+                padding: 0;
+                min-height: 100vh;
+                background: #000000;
+                background: 
+                    radial-gradient(circle at 50% 120%, rgba(0, 149, 255, 0.15) 0%, transparent 60%),
+                    radial-gradient(circle at 20% 40%, rgba(66, 220, 255, 0.1) 0%, transparent 40%),
+                    radial-gradient(circle at 80% 30%, rgba(0, 183, 255, 0.12) 0%, transparent 50%),
+                    linear-gradient(to bottom, #000000, #001428);
+                overflow: hidden;
+                position: relative;
+            }
+
+            /* Add ambient glow effects */
+            .ambient-glow {
+                position: fixed;
+                pointer-events: none;
+                z-index: -1;
+            }
+
+            .glow-1 {
+                top: -50%;
+                left: -20%;
+                width: 150vh;
+                height: 150vh;
+                background: radial-gradient(circle, rgba(0, 149, 255, 0.08) 0%, transparent 70%);
+                animation: pulse 8s ease-in-out infinite;
+            }
+
+            .glow-2 {
+                bottom: -30%;
+                right: -10%;
+                width: 120vh;
+                height: 120vh;
+                background: radial-gradient(circle, rgba(66, 220, 255, 0.06) 0%, transparent 60%);
+                animation: pulse 12s ease-in-out infinite reverse;
+            }
+
+            .glow-3 {
+                top: 20%;
+                left: 50%;
+                width: 80vh;
+                height: 80vh;
+                background: radial-gradient(circle, rgba(0, 183, 255, 0.04) 0%, transparent 50%);
+                animation: pulse 10s ease-in-out infinite 2s;
+            }
+
+            @keyframes pulse {
+                0%, 100% { transform: scale(1); opacity: 1; }
+                50% { transform: scale(1.2); opacity: 0.8; }
+            }
+
+            /* Add these styles for blur effect, open button and timer */
+            .frame-image.blurred {
+                filter: blur(20px);
+                transition: filter 0.5s ease;
+                margin-top: -30px;
+            }
+
+            .frame-open-btn {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0, 255, 255, 0.1);
+                border: 2px solid #00ffff;
+                color: #00ffff;
+                padding: 15px 40px;
+                font-size: 24px;
+                cursor: pointer;
+                z-index: 10;
+                transition: all 0.3s ease;
+                text-transform: uppercase;
+                letter-spacing: 3px;
+                backdrop-filter: blur(5px);
+                box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+                clip-path: polygon(
+                    0 10px,
+                    10px 0,
+                    calc(100% - 10px) 0,
+                    100% 10px,
+                    100% calc(100% - 10px),
+                    calc(100% - 10px) 100%,
+                    10px 100%,
+                    0 calc(100% - 10px)
+                );
+            }
+
+            .frame-open-btn:hover {
+                background: rgba(0, 255, 255, 0.2);
+                transform: translate(-50%, -50%) scale(1.1);
+                text-shadow: 0 0 10px #00ffff;
+                box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+            }
+
+            .frame-timer {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                background: rgba(0, 0, 0, 0.7);
+                color: #00ffff;
+                padding: 10px 20px;
+                font-size: 24px;
+                font-family: monospace;
+                border: 1px solid #00ffff;
+                border-radius: 5px;
+                text-shadow: 0 0 10px #00ffff;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+                z-index: 10;
+            }
+
+            .frame-timer.show {
+                opacity: 1;
+            }
+
+            /* Add login panel styles */
+            .login-panel {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(145deg, #000000, #001428);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 9999;
+            }
+
+            .login-container {
+                background: linear-gradient(145deg, rgba(0, 0, 0, 0.95), rgba(20, 20, 20, 0.98));
+                padding: 40px;
+                border-radius: 20px;
+                box-shadow: 0 0 50px rgba(0, 255, 255, 0.3),
+                           inset 0 0 30px rgba(0, 255, 255, 0.1);
+                border: 2px solid rgba(0, 255, 255, 0.2);
+                backdrop-filter: blur(10px);
+                width: 100%;
+                max-width: 400px;
+            }
+
+            .login-title {
+                color: #00ffff;
+                text-align: center;
+                font-size: 28px;
+                margin-bottom: 30px;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            }
+
+            .login-input {
+                width: 100%;
+                padding: 12px;
+                margin-bottom: 20px;
+                background: rgba(0, 0, 0, 0.5);
+                border: 1px solid rgba(0, 255, 255, 0.3);
+                border-radius: 8px;
+                color: #fff;
+                font-size: 16px;
+                transition: all 0.3s ease;
+            }
+
+            .login-input:focus {
+                outline: none;
+                border-color: #00ffff;
+                box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+            }
+
+            .login-button {
+                width: 100%;
+                padding: 15px;
+                background: rgba(0, 255, 255, 0.2);
+                border: 1px solid rgba(0, 255, 255, 0.3);
+                border-radius: 8px;
+                color: #fff;
+                font-size: 18px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+            }
+
+            .login-button:hover {
+                background: rgba(0, 255, 255, 0.3);
+                transform: translateY(-2px);
+            }
+
+            .login-error {
+                color: #ff4444;
+                text-align: center;
+                margin-top: 15px;
+                font-size: 14px;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+
+            .login-error.show {
+                opacity: 1;
+            }
+
+            .main-content {
+                display: none;
+            }
+
+            .main-content.show {
+                display: block;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Login Panel -->
+        <div class="login-panel" id="loginPanel">
+            <div class="login-container">
+                <h1 class="login-title">ScoopCast Login</h1>
+                <input type="text" class="login-input" id="username" placeholder="Username" autocomplete="off">
+                <input type="password" class="login-input" id="password" placeholder="Password">
+                <button class="login-button" onclick="attemptLogin()">Login</button>
+                <div class="login-error" id="loginError">Invalid username or password</div>
+            </div>
+        </div>
+
+        <!-- Main Content Wrapper -->
+        <div class="main-content" id="mainContent">
+            <!-- All-time Stats Panel -->
+            <div class="all-time-stats">
+                <h2 class="stats-title">All-Time Stats</h2>
+                <div class="stats-container">
+                    <div class="stats-card" data-player="aziz2">
+                        <div class="stats-player-name">Aziz</div>
+                        <div class="stats-details">
+                            <div class="stats-item">
+                                <span class="stats-label">TOTAL WINS</span>
+                                <span class="stats-value wins">0</span>
+                            </div>
+                            <div class="stats-item">
+                                <span class="stats-label">TOTAL SCORE</span>
+                                <span class="stats-value score">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stats-card" data-player="aman">
+                        <div class="stats-player-name">Aman</div>
+                        <div class="stats-details">
+                            <div class="stats-item">
+                                <span class="stats-label">TOTAL WINS</span>
+                                <span class="stats-value wins">0</span>
+                            </div>
+                            <div class="stats-item">
+                                <span class="stats-label">TOTAL SCORE</span>
+                                <span class="stats-value score">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stats-card" data-player="vish">
+                        <div class="stats-player-name">Vish</div>
+                        <div class="stats-details">
+                            <div class="stats-item">
+                                <span class="stats-label">TOTAL WINS</span>
+                                <span class="stats-value wins">0</span>
+                            </div>
+                            <div class="stats-item">
+                                <span class="stats-label">TOTAL SCORE</span>
+                                <span class="stats-value score">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stats-card" data-player="amesh">
+                        <div class="stats-player-name">Amesh</div>
+                        <div class="stats-details">
+                            <div class="stats-item">
+                                <span class="stats-label">TOTAL WINS</span>
+                                <span class="stats-value wins">0</span>
+                            </div>
+                            <div class="stats-item">
+                                <span class="stats-label">TOTAL SCORE</span>
+                                <span class="stats-value score">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="last-updated">Last Updated: Never</div>
+            </div>
+
+            <!-- Frame Viewer -->
+            <div class="frame-viewer">
+                <h2 class="frame-title">Guess The Frame</h2>
+                <div class="frame-container">
+                    <img class="frame-image blurred" src="" alt="Frame">
+                    <button class="frame-open-btn">OPEN</button>
+                    <div class="frame-timer">15</div>
+                    <button class="frame-nav frame-prev">←</button>
+                    <button class="frame-nav frame-next">→</button>
+                    <div class="frame-counter">1 / 1</div>
+                    <button class="reveal-button">Reveal</button>
+                    <div class="image-name"></div>
+                </div>
+            </div>
+
+            <!-- Section Navigation -->
+            <div class="section-navigation">
+                <button class="section-btn active" data-section="frame">Guess The Frame</button>
+                <button class="section-btn" data-section="dialogue">Guess The Dialogue</button>
+                <button class="section-btn" data-section="eyes">Guess The Eyes</button>
+                <button class="section-btn" data-section="curves">Guess The Curves</button>
+            </div>
+
+            <!-- Slot Machine -->
+            <div class="slot-machine">
+                <div class="slot-container">
+                    <div class="slot-window">
+                        <div class="slot-reel"></div>
+                    </div>
+                </div>
+                <button class="spin-button">SPIN</button>
+            </div>
+
+            <!-- Scoreboard -->
+            <div class="scoreboard">
+                <h2 class="scoreboard-title">SCORE BOARD</h2>
+                <div class="score-container">
+                    <div class="score-card" data-player="aziz2">
+                        <div class="player-info">
+                            <span class="player-name">Aziz</span>
+                            <span class="player-score">0</span>
+                        </div>
+                        <div class="score-controls">
+                            <button class="score-btn plus" onclick="updateScore('aziz2', 10)">+</button>
+                            <button class="score-btn minus" onclick="updateScore('aziz2', -10)">−</button>
+                        </div>
+                    </div>
+                    <div class="score-card" data-player="aman">
+                        <div class="player-info">
+                            <span class="player-name">Aman</span>
+                            <span class="player-score">0</span>
+                        </div>
+                        <div class="score-controls">
+                            <button class="score-btn plus" onclick="updateScore('aman', 10)">+</button>
+                            <button class="score-btn minus" onclick="updateScore('aman', -10)">−</button>
+                        </div>
+                    </div>
+                    <div class="score-card" data-player="vish">
+                        <div class="player-info">
+                            <span class="player-name">Vish</span>
+                            <span class="player-score">0</span>
+                        </div>
+                        <div class="score-controls">
+                            <button class="score-btn plus" onclick="updateScore('vish', 10)">+</button>
+                            <button class="score-btn minus" onclick="updateScore('vish', -10)">−</button>
+                        </div>
+                    </div>
+                    <div class="score-card" data-player="amesh">
+                        <div class="player-info">
+                            <span class="player-name">Amesh</span>
+                            <span class="player-score">0</span>
+                        </div>
+                        <div class="score-controls">
+                            <button class="score-btn plus" onclick="updateScore('amesh', 10)">+</button>
+                            <button class="score-btn minus" onclick="updateScore('amesh', -10)">−</button>
+                        </div>
+                    </div>
+                </div>
+                <button class="submit-score-btn" onclick="announceWinner()">Submit Scores</button>
+            </div>
+
+            <!-- Add this before the winner-popup div -->
+            <div class="referee-popup">
+                <h2 class="referee-title">Referee Selected!</h2>
+                <div class="referee-name"></div>
+                <button class="close-popup" onclick="closeRefereePopup()">OK</button>
+            </div>
+
+            <!-- Add this before the winner-popup div -->
+            <div class="reveal-popup">
+                <div class="reveal-content">
+                    <h2 class="reveal-title">Revealed Image</h2>
+                    <img class="reveal-image" src="" alt="Revealed Image">
+                    <button class="close-popup" onclick="closeRevealPopup()">Close</button>
+                </div>
+            </div>
+
+            <!-- Winner Popup -->
+            <div class="winner-popup">
+                <h2 class="winner-title">Winner!</h2>
+                <div class="winner-name"></div>
+                <div class="winner-score"></div>
+                <div class="creator-credit">
+                    <p>Created by Kaustubh</p>
+                    <img src="./images/QR.jpeg" alt="QR Code" class="qr-code">
+                </div>
+                <button class="close-popup" onclick="closeWinnerPopup()">Close</button>
+            </div>
+
+            <div class="ambient-glow glow-1"></div>
+            <div class="ambient-glow glow-2"></div>
+            <div class="ambient-glow glow-3"></div>
+        </div>
+
+        <script src="./script.js"></script>
+        <script>
+            // Add login functionality at the start of your scripts
+            function attemptLogin() {
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                const loginError = document.getElementById('loginError');
+                const loginPanel = document.getElementById('loginPanel');
+                const mainContent = document.getElementById('mainContent');
+
+                if (username === 'scoopcast' && password === 'scoopcast@777') {
+                    // Store login state
+                    localStorage.setItem('scoopcastLoggedIn', 'true');
+                    
+                    // Hide login, show content
+                    loginPanel.style.display = 'none';
+                    mainContent.classList.add('show');
+                    
+                    // Initialize the page
+                    loadSectionImages('frame');
+                } else {
+                    loginError.classList.add('show');
+                    setTimeout(() => loginError.classList.remove('show'), 3000);
+                }
+            }
+
+            // Check login state on page load
+            window.addEventListener('load', function() {
+                const isLoggedIn = localStorage.getItem('scoopcastLoggedIn') === 'true';
+                const loginPanel = document.getElementById('loginPanel');
+                const mainContent = document.getElementById('mainContent');
+
+                if (isLoggedIn) {
+                    loginPanel.style.display = 'none';
+                    mainContent.classList.add('show');
+                    loadSectionImages('frame');
+                } else {
+                    loginPanel.style.display = 'flex';
+                    mainContent.classList.remove('show');
+                }
+            });
+
+            // Add event listener for Enter key on password input
+            document.getElementById('password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    attemptLogin();
+                }
+            });
+
+            // Add logout functionality
+            function logout() {
+                localStorage.removeItem('scoopcastLoggedIn');
+                location.reload();
+            }
+
+            // Add this to your existing scripts
+            const sections = ['frame', 'dialogue', 'eyes', 'curves'];
+            const sectionButtons = document.querySelectorAll('.section-btn');
+            const frameViewer = document.querySelector('.frame-viewer');
+            const frameImage = document.querySelector('.frame-image');
+            const frameCounter = document.querySelector('.frame-counter');
+            const frameTitle = document.querySelector('.frame-title');
+            const revealButton = document.querySelector('.reveal-button');
+            const imageName = document.querySelector('.image-name');
+            
+            let currentSection = 'frame';
+            let currentFrameIndex = 0;
+            let frameImages = [];
+            let currentImageData = null;
+
+            // Add this right after your existing variable declarations in the JavaScript section
+            // Initialize with some default images for testing
+            const defaultImages = {
+                frame: [
+                    { src: './images/frame1.jpg', name: 'Frame 1' },
+                    { src: './images/frame2.jpg', name: 'Frame 2' }
+                ],
+                dialogue: [
+                    { src: './images/dialogue1.jpg', name: 'Dialogue 1' },
+                    { src: './images/dialogue2.jpg', name: 'Dialogue 2' }
+                ],
+                eyes: [
+                    { src: './images/eyes1.jpg', name: 'Eyes 1' },
+                    { src: './images/eyes2.jpg', name: 'Eyes 2' }
+                ],
+                curves: [
+                    { src: './images/curves1.jpg', name: 'Curves 1' },
+                    { src: './images/curves2.jpg', name: 'Curves 2' }
+                ]
+            };
+
+            // Modified loadSectionImages function
+            function loadSectionImages(section) {
+                try {
+                    // Try to get images from localStorage first
+                    let images = JSON.parse(localStorage.getItem(`${section}Images`) || '[]');
+                    
+                    // If no images in localStorage, use default images
+                    if (!images || images.length === 0) {
+                        images = defaultImages[section] || [];
+                        // Save to localStorage for future use
+                        localStorage.setItem(`${section}Images`, JSON.stringify(images));
+                    }
+                    
+                    console.log(`Loading ${section} images:`, images);
+                    frameImages = images;
+                    currentFrameIndex = 0;
+                    
+                    // Hide name when switching sections
+                    imageName.textContent = '';
+                    imageName.classList.remove('show');
+                    
+                    updateFrameDisplay();
+                } catch (error) {
+                    console.error(`Error loading ${section} images:`, error);
+                    frameImages = defaultImages[section] || [];
+                    updateFrameDisplay();
+                }
+            }
+
+            // Modified updateFrameDisplay function
+            function updateFrameDisplay() {
+                console.log('Updating display:', { 
+                    section: currentSection,
+                    images: frameImages,
+                    currentIndex: currentFrameIndex 
+                });
+                
+                if (frameImages && frameImages.length > 0) {
+                    currentImageData = frameImages[currentFrameIndex];
+                    
+                    if (currentImageData && currentImageData.src) {
+                        // Apply blur immediately before loading new image
+                        frameImage.classList.add('blurred');
+                        frameOpenBtn.style.display = 'block';
+                        
+                        // Create a new image object to check if the image loads
+                        const img = new Image();
+                        img.onload = function() {
+                            frameImage.src = currentImageData.src;
+                            frameCounter.textContent = `${currentFrameIndex + 1} / ${frameImages.length}`;
+                            imageName.textContent = '';
+                            imageName.classList.remove('show');
+                            clearInterval(timerInterval);
+                            frameTimer.classList.remove('show');
+                        };
+                        img.onerror = function() {
+                            console.error('Failed to load image:', currentImageData.src);
+                            frameImage.src = '';
+                            frameCounter.textContent = 'Image failed to load';
+                        };
+                        img.src = currentImageData.src;
+                    } else {
+                        console.error('Invalid image data:', currentImageData);
+                        frameImage.src = '';
+                        frameCounter.textContent = 'Invalid image data';
+                        currentImageData = null;
+                    }
+                } else {
+                    console.log('No images available for section:', currentSection);
+                    frameImage.src = '';
+                    frameCounter.textContent = 'No images available';
+                    currentImageData = null;
+                }
+            }
+
+            // Modify the startTimer and resetFrame functions
+            function startTimer() {
+                let timeLeft = 15;
+                frameTimer.textContent = timeLeft;
+                frameTimer.classList.add('show');
+
+                timerInterval = setInterval(() => {
+                    timeLeft--;
+                    frameTimer.textContent = timeLeft;
+
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        frameTimer.classList.remove('show');
+                    }
+                }, 1000);
+            }
+
+            function resetFrame() {
+                clearInterval(timerInterval);
+                frameTimer.classList.remove('show');
+                frameImage.classList.add('blurred');
+                frameOpenBtn.style.display = 'block';
+            }
+
+            // Update the navigation button handlers
+            document.querySelector('.frame-prev').addEventListener('click', () => {
+                if (currentFrameIndex > 0) {
+                    currentFrameIndex--;
+                    updateFrameDisplay();
+                }
+            });
+
+            document.querySelector('.frame-next').addEventListener('click', () => {
+                if (currentFrameIndex < frameImages.length - 1) {
+                    currentFrameIndex++;
+                    updateFrameDisplay();
+                }
+            });
+
+            // Section buttons
+            sectionButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const section = button.dataset.section;
+                    console.log('Switching to section:', section);
+                    
+                    currentSection = section;
+                    
+                    // Update active button
+                    sectionButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+
+                    // Update title
+                    frameTitle.textContent = `Guess The ${section.charAt(0).toUpperCase() + section.slice(1)}`;
+                    
+                    // Load images for new section
+                    loadSectionImages(section);
+                });
+            });
+
+            // Reveal button functionality
+            revealButton.addEventListener('click', () => {
+                if (currentImageData && currentImageData.name) {
+                    if (currentSection === 'curves' && currentImageData.revealSrc) {
+                        // Show reveal popup for curves section
+                        showRevealPopup(currentImageData.revealSrc);
+                    } else {
+                        // Original reveal functionality for other sections
+                        const imageNameElement = document.querySelector('.image-name');
+                        
+                        // Create glitch overlay
+                        const overlay = document.createElement('div');
+                        overlay.className = 'glitch-overlay';
+                        document.body.appendChild(overlay);
+                        
+                        // Remove overlay after animation
+                        setTimeout(() => overlay.remove(), 1000);
+                        
+                        // Reset classes and set text
+                        imageNameElement.textContent = currentImageData.name;
+                        imageNameElement.classList.remove('show', 'typing');
+                        void imageNameElement.offsetWidth; // Trigger reflow
+                        imageNameElement.classList.add('glitch');
+                        
+                        // Play glitch sound effect
+                        const audio = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU');
+                        audio.volume = 0.3;
+                        audio.play().catch(e => console.log('Audio play failed:', e));
+                        
+                        // Remove glitch class after animation
+                        setTimeout(() => {
+                            imageNameElement.classList.remove('glitch');
+                            imageNameElement.classList.add('show');
+                        }, 1500);
+                    }
+                }
+            });
+
+            // Initialize scores in localStorage if they don't exist
+            if (!localStorage.getItem('playerScores')) {
+                const initialScores = {
+                    'aziz2': 0,
+                    'aman': 0,
+                    'vish': 0,
+                    'amesh': 0
+                };
+                localStorage.setItem('playerScores', JSON.stringify(initialScores));
+            }
+
+            // Load scores from localStorage
+            function loadScores() {
+                const scores = JSON.parse(localStorage.getItem('playerScores'));
+                Object.keys(scores).forEach(player => {
+                    const scoreElement = document.querySelector(`[data-player="${player}"] .player-score`);
+                    if (scoreElement) {
+                        scoreElement.textContent = scores[player];
+                    }
+                });
+            }
+
+            // Update score function
+            function updateScore(player, points) {
+                const scores = JSON.parse(localStorage.getItem('playerScores'));
+                scores[player] = (scores[player] || 0) + points;
+                
+                // Update localStorage
+                localStorage.setItem('playerScores', JSON.stringify(scores));
+                
+                // Update display
+                const scoreElement = document.querySelector(`[data-player="${player}"] .player-score`);
+                if (scoreElement) {
+                    scoreElement.textContent = scores[player];
+                    scoreElement.classList.remove('score-updated');
+                    void scoreElement.offsetWidth; // Trigger reflow
+                    scoreElement.classList.add('score-updated');
+                }
+
+                // Play audio when points are added (plus button)
+                if (points > 0) {
+                    // Get the player name without the number
+                    const playerName = player.replace('2', '').toLowerCase();
+                    const audio = new Audio(`./audio/${playerName}.wav`);
+                    audio.volume = 0.6; // Set volume to 60%
+                    audio.play().catch(e => console.log('Audio play failed:', e));
+                }
+
+                // Show notification
+                const pointText = points > 0 ? `+${points}` : points;
+                const notification = document.createElement('div');
+                notification.className = 'notification';
+                notification.textContent = `${player.charAt(0).toUpperCase() + player.slice(1)}: ${pointText} points!`;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.remove();
+                }, 2000);
+            }
+
+            // Load scores when page loads
+            loadScores();
+
+            // Add these functions in the script section
+            function announceWinner() {
+                const scores = JSON.parse(localStorage.getItem('playerScores'));
+                let maxScore = -Infinity;
+                let winner = '';
+                
+                // Find the winner
+                Object.entries(scores).forEach(([player, score]) => {
+                    if (score > maxScore) {
+                        maxScore = score;
+                        winner = player;
+                    }
+                });
+
+                // Format winner name
+                const displayName = winner.charAt(0).toUpperCase() + winner.slice(1).replace('2', '');
+
+                // Show winner popup
+                const popup = document.querySelector('.winner-popup');
+                const winnerName = popup.querySelector('.winner-name');
+                const winnerScore = popup.querySelector('.winner-score');
+                
+                winnerName.textContent = displayName;
+                winnerScore.textContent = `Score: ${maxScore}`;
+                popup.classList.add('show');
+
+                // Add confetti effect
+                createConfetti();
+            }
+
+            function closeWinnerPopup() {
+                const popup = document.querySelector('.winner-popup');
+                popup.classList.remove('show');
+            }
+
+            function createConfetti() {
+                for (let i = 0; i < 100; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.animationDelay = Math.random() * 3 + 's';
+                    confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                    document.body.appendChild(confetti);
+
+                    setTimeout(() => confetti.remove(), 3000);
+                }
+            }
+
+            // Initialize all-time stats in localStorage if they don't exist
+            if (!localStorage.getItem('allTimeStats')) {
+                const initialStats = {
+                    'aziz2': { wins: 0, totalScore: 0, gamesPlayed: 0, lastUpdated: null },
+                    'aman': { wins: 0, totalScore: 0, gamesPlayed: 0, lastUpdated: null },
+                    'vish': { wins: 0, totalScore: 0, gamesPlayed: 0, lastUpdated: null },
+                    'amesh': { wins: 0, totalScore: 0, gamesPlayed: 0, lastUpdated: null }
+                };
+                localStorage.setItem('allTimeStats', JSON.stringify(initialStats));
+            }
+
+            // Load all-time stats
+            function loadAllTimeStats() {
+                const stats = JSON.parse(localStorage.getItem('allTimeStats'));
+                Object.keys(stats).forEach(player => {
+                    const card = document.querySelector(`.stats-card[data-player="${player}"]`);
+                    if (card) {
+                        const playerStats = stats[player];
+                        card.querySelector('.wins').textContent = playerStats.wins;
+                        card.querySelector('.score').textContent = playerStats.totalScore;
+                    }
+                });
+
+                // Update last updated time
+                const lastUpdated = document.querySelector('.last-updated');
+                const mostRecentUpdate = Object.values(stats)
+                    .map(s => s.lastUpdated)
+                    .filter(d => d)
+                    .sort()
+                    .pop();
+                
+                if (mostRecentUpdate) {
+                    const date = new Date(mostRecentUpdate);
+                    lastUpdated.textContent = `Last Updated: ${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+                }
+            }
+
+            // Call loadAllTimeStats when page loads
+            loadAllTimeStats();
+
+            // Add this to the script section
+            function showRefereePopup(name) {
+                const popup = document.querySelector('.referee-popup');
+                const refereeName = popup.querySelector('.referee-name');
+                refereeName.textContent = `${name} is the Referee!`;
+                popup.classList.add('show');
+            }
+
+            function closeRefereePopup() {
+                const popup = document.querySelector('.referee-popup');
+                popup.classList.remove('show');
+            }
+
+            // Update the existing updateDisplay function in your slot machine code to show the referee popup
+            function updateDisplay(selectedImage) {
+                // ... existing code ...
+                
+                // Show referee popup with the selected name
+                const name = selectedImage.split('/').pop().split('.')[0];
+                const displayName = name.charAt(0).toUpperCase() + name.slice(1).replace('2', '');
+                showRefereePopup(displayName);
+            }
+
+            // Add this to your JavaScript section
+            const frameOpenBtn = document.querySelector('.frame-open-btn');
+            const frameTimer = document.querySelector('.frame-timer');
+            let timerInterval;
+
+            frameOpenBtn.addEventListener('click', () => {
+                frameImage.classList.remove('blurred');
+                frameOpenBtn.style.display = 'none';
+                startTimer();
+            });
+
+            // Add these functions in the script section
+            function showRevealPopup(imageSrc) {
+                const popup = document.querySelector('.reveal-popup');
+                const image = popup.querySelector('.reveal-image');
+                const title = popup.querySelector('.reveal-title');
+                image.src = imageSrc;
+                
+                // Set the title to only show the image name
+                if (currentImageData && currentImageData.name) {
+                    title.textContent = currentImageData.name;
+                } else {
+                    title.textContent = 'Image';
+                }
+                
+                popup.classList.add('show');
+            }
+
+            function closeRevealPopup() {
+                const popup = document.querySelector('.reveal-popup');
+                popup.classList.remove('show');
+            }
+        </script>
+    </body>
+</html> 
